@@ -1,26 +1,35 @@
-import { askDeepSeek } from "../services/ai";
-import { BotContext } from "../types/bot-types";
+import { markdownToHtml } from '../lib/formatMarkdown';
+import { askDeepSeek } from '../services/ai';
+import { BotContext } from '../types/bot-types';
 
+export async function aiAnswerHandler(
+  ctx: BotContext,
+  next: () => Promise<void>,
+) {
+  const message = ctx.message?.text;
 
-export async function aiAnswerHandler(ctx: BotContext, next: () => Promise<void>) {
-    const message = ctx.message?.text;
+  if (!ctx.session.waitingForAI) {
+    return next();
+  }
 
-    if (!message) {
-        return next();
-    }
+  if (!message) {
+    return next();
+  }
 
-    const thinkingMessage = await ctx.reply('thinking...');
+  ctx.session.waitingForAI = false;
+  
+  const thinkingMessage = await ctx.reply('thinking...');
 
-    const safeDelete = () =>
-        ctx.api.deleteMessage(ctx.chat!.id, thinkingMessage.message_id);
+  const safeDelete = () =>
+    ctx.api.deleteMessage(ctx.chat!.id, thinkingMessage.message_id);
 
-    try {
-        const response = await askDeepSeek(message);
-        await ctx.reply(response);
-    } catch (error) {
-        console.log(error);
-        await ctx.reply('произошла ошибка при обработке вашего запроса');
-    } finally {
-        safeDelete()
-    }
-} 
+  try {
+    const response = await askDeepSeek(message);
+    await ctx.reply(markdownToHtml(response), { parse_mode: 'HTML' });
+  } catch (error) {
+    console.log(error);
+    await ctx.reply('произошла ошибка при обработке вашего запроса');
+  } finally {
+    safeDelete();
+  }
+}
