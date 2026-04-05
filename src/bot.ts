@@ -1,10 +1,10 @@
 import 'dotenv/config';
 import { Bot, session } from 'grammy';
-import { BotContext, SessionData } from './types/bot-types.js';
-import { startHandler } from './handlers/start.js';
-import { aiAnswerHandler } from './handlers/ai-answer.js';
-import { Hears } from './consts/hears.js';
-import { HelpHandler } from './handlers/help.js';
+import { BotContext, SessionData } from './types/bot-types';
+import { startHandler } from './handlers/start';
+import { aiAnswerHandler } from './handlers/ai-answer';
+import { Hears } from './consts/hears';
+import { HelpHandler } from './handlers/help';
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
